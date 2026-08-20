@@ -1,0 +1,2 @@
+LOST|ITEM1786285599054|bag|Bag|laptop bag|black|ist 507|09-08-2026|abcdef|9876543210|LOST|abcdef|C:\Users\kathi\OneDrive\Pictures\blackbag17.jpeg
+FOUND|ITEM1786285891602|bag|Bag|laptop bag|black|ist509|09-08-2026|user2|9876543212|FOUND|user2|C:\Users\kathi\OneDrive\Pictures\blackbag17.jpeg
