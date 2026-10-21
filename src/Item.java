@@ -1,37 +1,4 @@
 import java.time.LocalDate;
-/**
-* Item.java
-*
-* Abstract base class for anything reported into the system.
-* LostItem and FoundItem both extend this class, which is
-where the
-* OOP concepts of inheritance, abstraction and polymorphism
-come in:
-*
-* Item (abstract)
-* |-- LostItem
-* |-- FoundItem
-*
-* Every concrete subclass must implement getType(), which
-lets the
-* rest of the application (AssetManager, DashboardFrame,
-AdminFrame)
-* treat LostItem and FoundItem objects polymorphically
-through a
-* single Item reference, while still being able to tell them
-apart
-* when needed (for example, when deciding which MySQL "type"
-value
-* to store, or which icon/tab an item belongs to).
-*
-* IMPORTANT: the image field is intentionally named
-"imagePath"
-* (not "filePath") and the colour field is spelled "colour"
-* (not "color"), matching the naming used throughout the rest
-of
-* the project (MySQL columns, AssetManager, DashboardFrame,
-* AdminFrame).
-*/
 public abstract class Item {
 protected int id;
 protected String name;

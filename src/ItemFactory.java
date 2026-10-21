@@ -1,25 +1,4 @@
 import java.time.LocalDate;
-/**
-* ItemFactory.java
-*
-* Implements the Factory design pattern for creating Item
-* objects.
-* Instead of the rest of the application writing:
-*
-* if (type.equals("LOST")) { new LostItem(...) } else {
-* new FoundItem(...) }
-*
-* everywhere it needs a new Item, it simply calls
-* ItemFactory.createItem(type, ...) and lets this class
-* decide which
-* concrete subclass to instantiate. This keeps object-
-* creation logic
-* in one place and is what AssetManager uses both when
-* inserting a
-* newly-reported item and when rebuilding Item objects out of
-* MySQL
-* ResultSet rows.
-*/
 public class ItemFactory {
 // Private constructor: this class only exposes static
 // factory

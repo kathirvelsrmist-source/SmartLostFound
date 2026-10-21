@@ -1,23 +1,3 @@
-/**
-* User.java
-*
-* Represents a registered user of the Smart Lost & Found
-Asset Tracking
-* System. The same class is used for both normal users and
-the
-* administrator; the difference between them is captured by
-the
-* "role" field ("USER" or "ADMIN").
-*
-* This is a plain encapsulated model class (POJO): all fields
-are
-* private and only accessible through getters/setters.
-Objects of
-* this class are created either:
-* - by AssetManager after reading a row from the "users"
-table, or
-* - by LoginFrame while collecting registration details.
-*/
 public class User {
 private int id;
 private String username;
