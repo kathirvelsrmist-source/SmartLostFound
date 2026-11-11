@@ -1,1 +1,2298 @@
-.
+I.JAVA CODINGS:-
+
+1.User.java srcItem.java src:-
+
+public class User {
+private int id;
+private String username;
+private String password;
+private String name;
+private String phone;
+private String role;
+/**
+* Constructor used when the user does not have a database
+id yet
+* (for example, right before registration).
+*/
+public User(String username, String password, String name,
+String phone, String role) {
+this.username = username;
+this.password = password;
+this.name = name;
+this.phone = phone;
+this.role = role;
+}
+/**
+* Constructor used when rebuilding a User object from a
+database
+* row, where the id is already known.
+*/
+public User(int id, String username, String password,
+String name, String phone, String role) {
+this(username, password, name, phone, role);
+this.id = id;
+}
+public int getId() {
+return id;
+}
+public void setId(int id) {
+this.id = id;
+}
+public String getUsername() {
+return username;
+}
+public void setUsername(String username) {
+this.username = username;
+}
+public String getPassword() {
+return password;
+}
+public void setPassword(String password) {
+this.password = password;
+}
+public String getName() {
+return name;
+}
+public void setName(String name) {
+this.name = name;
+}
+public String getPhone() {
+return phone;
+}
+public void setPhone(String phone) {
+this.phone = phone;
+}
+public String getRole() {
+return role;
+}
+public void setRole(String role) {
+this.role = role;
+}
+/**
+* Convenience method used by the UI layer to decide
+whether the
+* logged-in user should see AdminFrame or DashboardFrame.
+*/
+public boolean isAdmin() {
+return "ADMIN".equalsIgnoreCase(role);
+}
+@Override
+public String toString() {
+return "User{" +
+"id=" + id +
+", username='" + username + '\'' +
+", name='" + name + '\'' +
+", phone='" + phone + '\'' +
+", role='" + role + '\'' +
+'}';
+}
+}
+
+2.Item.java src:-
+
+import java.time.LocalDate;
+public abstract class Item {
+protected int id;
+protected String name;
+protected String category;
+protected String description;
+protected String colour;
+protected String location;
+protected LocalDate date;
+protected String reporterUsername;
+protected String contact;
+protected String status;
+protected String imagePath;
+protected Item(String name,
+String category,
+String description,
+String colour,
+String location,
+LocalDate date,
+String reporterUsername,
+String contact,
+String status,
+String imagePath) {
+this.name = name;
+this.category = category;
+this.description = description;
+this.colour = colour;
+this.location = location;
+this.date = date;
+this.reporterUsername = reporterUsername;
+this.contact = contact;
+this.status = status;
+this.imagePath = imagePath;
+}
+/**
+* Returns "LOST" or "FOUND" depending on the concrete
+subclass.
+* This value is also what gets stored in the MySQL "type"
+column.
+*/
+public abstract String getType();
+public int getId() {
+return id;
+}
+public void setId(int id) {
+this.id = id;
+}
+public String getName() {
+return name;
+}
+public void setName(String name) {
+this.name = name;
+}
+public String getCategory() {
+return category;
+}
+public void setCategory(String category) {
+this.category = category;
+}
+public String getDescription() {
+return description;
+}
+public void setDescription(String description) {
+this.description = description;
+}
+public String getColour() {
+return colour;
+}
+public void setColour(String colour) {
+this.colour = colour;
+}
+public String getLocation() {
+return location;
+}
+public void setLocation(String location) {
+this.location = location;
+}
+public LocalDate getDate() {
+return date;
+}
+public void setDate(LocalDate date) {
+this.date = date;
+}
+public String getReporterUsername() {
+return reporterUsername;
+}
+public void setReporterUsername(String reporterUsername) {
+this.reporterUsername = reporterUsername;
+}
+public String getContact() {
+return contact;
+}
+public void setContact(String contact) {
+this.contact = contact;
+}
+public String getStatus() {
+return status;
+}
+public void setStatus(String status) {
+this.status = status;
+}
+public String getImagePath() {
+return imagePath;
+}
+public void setImagePath(String imagePath) {
+this.imagePath = imagePath;
+}
+/**
+* True if this item currently has an attached image.
+* Used by DashboardFrame/AdminFrame to decide whether to
+show
+* "View Image" or "No Image" in the table and dialogs.
+*/
+public boolean hasImage() {
+return imagePath != null && !imagePath.isBlank();
+}
+@Override
+public String toString() {
+return getType() + "{" +
+"id=" + id +
+", name='" + name + '\'' +
+", category='" + category + '\'' +
+", colour='" + colour + '\'' +
+", location='" + location + '\'' +
+", status='" + status + '\'' +
+'}';
+}
+}
+
+3.LostItem.java src:-
+
+import java.time.LocalDate;
+public class LostItem extends Item {
+public LostItem(String name,
+String category,
+String description,
+String colour,
+String location,
+LocalDate date,
+String reporterUsername,
+String contact,
+String status,
+String imagePath) {
+super(name, category, description, colour, location,
+date,
+reporterUsername, contact, status, imagePath);
+}
+@Override
+public String getType() {
+return "LOST";
+}
+}
+
+4.FoundItem.java src:-
+
+import java.time.LocalDate;
+public class FoundItem extends Item {
+public FoundItem(String name,
+String category,
+String description,
+String colour,
+String location,
+LocalDate date,
+String reporterUsername,
+String contact,
+String status,
+String imagePath) {
+super(name, category, description, colour, location,
+date,
+reporterUsername, contact, status, imagePath);
+}
+@Override
+public String getType() {
+return "FOUND";
+}
+}
+
+5.ItemFactory.java src:-
+
+import java.time.LocalDate;
+public class ItemFactory {
+// Private constructor: this class only exposes static
+// factory
+// methods and is never meant to be instantiated.
+private ItemFactory() {
+}
+public static Item createItem(String type,
+String name,
+String category,
+String description,
+String colour,
+
+String location,
+LocalDate date,
+String reporterUsername,
+String contact,
+String status,
+String imagePath) {
+if (type == null) {
+throw new IllegalArgumentException("Item typecannot be null");
+}
+switch (type.toUpperCase()) {
+case "LOST":
+return new LostItem(name, category,
+description, colour, location,
+date, reporterUsername, contact,
+status, imagePath);
+case "FOUND":
+return new FoundItem(name, category,
+description, colour, location,
+date, reporterUsername, contact,
+status, imagePath);
+default:
+throw new IllegalArgumentException("Unknownitem type: " + type);
+}
+}
+}
+
+6.AssetManager.java src:-
+
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+public class AssetManager {
+
+    public User login(String username, String password) {
+        String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, username);
+            ps.setString(2, password);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapRowToUser(rs);
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public boolean register(String username, String password, String name, String phone) {
+        if (isUsernameTaken(username)) {
+            return false;
+        }
+
+        String sql = "INSERT INTO users (username, password, name, phone, role) " +
+                     "VALUES (?, ?, ?, ?, 'USER')";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, username);
+            ps.setString(2, password);
+            ps.setString(3, name);
+            ps.setString(4, phone);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean isUsernameTaken(String username) {
+        String sql = "SELECT id FROM users WHERE username = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, username);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean addItem(Item item) {
+        String sql = "INSERT INTO items " +
+                     "(type, name, category, description, colour, location, item_date, " +
+                     "reporter_username, contact, status, image_path) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, item.getType());
+            ps.setString(2, item.getName());
+            ps.setString(3, item.getCategory());
+            ps.setString(4, item.getDescription());
+            ps.setString(5, item.getColour());
+            ps.setString(6, item.getLocation());
+            ps.setDate(7, item.getDate() != null ? Date.valueOf(item.getDate()) : null);
+            ps.setString(8, item.getReporterUsername());
+            ps.setString(9, item.getContact());
+            ps.setString(10, item.getStatus());
+            ps.setString(11, item.getImagePath());
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updateItemStatus(int itemId, String newStatus) {
+        String sql = "UPDATE items SET status = ? WHERE id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, newStatus);
+            ps.setInt(2, itemId);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean deleteItem(int itemId) {
+        String sql = "DELETE FROM items WHERE id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, itemId);
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public List<Item> getAllItems() {
+        String sql = "SELECT * FROM items ORDER BY id DESC";
+        return runItemQuery(sql);
+    }
+
+    public List<Item> getUserItems(String username) {
+        String sql = "SELECT * FROM items WHERE reporter_username = ? ORDER BY id DESC";
+        return runItemQuery(sql, username);
+    }
+
+    public List<Item> searchItems(String keyword) {
+        String sql = "SELECT * FROM items WHERE " +
+                     "name LIKE ? OR category LIKE ? OR description LIKE ? OR " +
+                     "colour LIKE ? OR location LIKE ? OR reporter_username LIKE ? OR " +
+                     "status LIKE ? ORDER BY id DESC";
+
+        String likeKeyword = "%" + keyword + "%";
+
+        return runItemQuery(
+                sql,
+                likeKeyword,
+                likeKeyword,
+                likeKeyword,
+                likeKeyword,
+                likeKeyword,
+                likeKeyword,
+                likeKeyword
+        );
+    }
+
+    public List<Item> filterItems(String type, String category, String status, String location) {
+        StringBuilder sql = new StringBuilder("SELECT * FROM items WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+
+        if (type != null && !type.equalsIgnoreCase("All")) {
+            sql.append(" AND type = ?");
+            params.add(type.toUpperCase());
+        }
+
+        if (category != null && !category.equalsIgnoreCase("All")) {
+            sql.append(" AND category = ?");
+            params.add(category);
+        }
+
+        if (status != null && !status.equalsIgnoreCase("All")) {
+            sql.append(" AND status = ?");
+            params.add(status);
+        }
+
+        if (location != null && !location.isBlank() && !location.equalsIgnoreCase("All")) {
+            sql.append(" AND location LIKE ?");
+            params.add("%" + location + "%");
+        }
+
+        sql.append(" ORDER BY id DESC");
+
+        return runItemQuery(sql.toString(), params.toArray());
+    }
+
+    public List<Item> checkPossibleMatches(Item item) {
+        String oppositeType =
+                "LOST".equalsIgnoreCase(item.getType()) ? "FOUND" : "LOST";
+
+        String sql = "SELECT * FROM items WHERE type = ? AND status = 'ACTIVE' AND " +
+                     "category = ? AND (name LIKE ? OR colour LIKE ?) ORDER BY id DESC";
+
+        String likeName = "%" + item.getName() + "%";
+        String likeColour = "%" + item.getColour() + "%";
+
+        return runItemQuery(
+                sql,
+                oppositeType,
+                item.getCategory(),
+                likeName,
+                likeColour
+        );
+    }
+
+    private List<Item> runItemQuery(String sql, Object... params) {
+        List<Item> items = new ArrayList<>();
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            for (int i = 0; i < params.length; i++) {
+                ps.setObject(i + 1, params[i]);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    items.add(mapRowToItem(rs));
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return items;
+    }
+
+    private Item mapRowToItem(ResultSet rs) throws SQLException {
+        Date sqlDate = rs.getDate("item_date");
+        LocalDate localDate = sqlDate != null ? sqlDate.toLocalDate() : null;
+
+        Item item = ItemFactory.createItem(
+                rs.getString("type"),
+                rs.getString("name"),
+                rs.getString("category"),
+                rs.getString("description"),
+                rs.getString("colour"),
+                rs.getString("location"),
+                localDate,
+                rs.getString("reporter_username"),
+                rs.getString("contact"),
+                rs.getString("status"),
+                rs.getString("image_path")
+        );
+
+        item.setId(rs.getInt("id"));
+        return item;
+    }
+
+    private User mapRowToUser(ResultSet rs) throws SQLException {
+        return new User(
+                rs.getInt("id"),
+                rs.getString("username"),
+                rs.getString("password"),
+                rs.getString("name"),
+                rs.getString("phone"),
+                rs.getString("role")
+        );
+    }
+
+    public List<User> getAllUsers() {
+        String sql = "SELECT * FROM users ORDER BY (role = 'ADMIN') DESC, username ASC";
+        List<User> users = new ArrayList<>();
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                users.add(mapRowToUser(rs));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return users;
+    }
+
+    public boolean deleteUser(String username) {
+        if ("kathir".equalsIgnoreCase(username)) {
+            return false;
+        }
+
+        String sql = "DELETE FROM users WHERE username = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, username);
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static class Stats {
+        public int totalUsers;
+        public int totalItems;
+        public int totalLostItems;
+        public int totalFoundItems;
+    }
+
+    public Stats getDashboardStats() {
+        Stats stats = new Stats();
+
+        String sql = "SELECT " +
+                     "(SELECT COUNT(*) FROM users) AS totalUsers, " +
+                     "(SELECT COUNT(*) FROM items) AS totalItems, " +
+                     "(SELECT COUNT(*) FROM items WHERE type = 'LOST') AS totalLost, " +
+                     "(SELECT COUNT(*) FROM items WHERE type = 'FOUND') AS totalFound";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                stats.totalUsers = rs.getInt("totalUsers");
+                stats.totalItems = rs.getInt("totalItems");
+                stats.totalLostItems = rs.getInt("totalLost");
+                stats.totalFoundItems = rs.getInt("totalFound");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return stats;
+    }
+}
+
+7.LoginFrame.java src:-
+
+import javax.swing.*;
+import java.awt.*;
+/**
+* LoginFrame.java
+*
+* The first screen shown when the application starts. Uses a
+* CardLayout to flip between a Login card and a Register card
+* inside
+* the SAME JFrame, instead of opening a second window.
+*
+* Responsibilities:
+* - authenticate an existing user through
+* AssetManager.login(...)
+* - register a brand-new normal user through
+* AssetManager.register(...)
+* - decide, based on User.isAdmin(), whether to open
+* AdminFrame or
+* DashboardFrame next
+*
+* This class never talks to java.sql directly — all
+* persistence goes
+* through the shared AssetManager instance.
+*/
+public class LoginFrame extends JFrame {
+private final AssetManager assetManager = new
+AssetManager();
+private final CardLayout cardLayout = new CardLayout();
+private final JPanel cardPanel = new JPanel(cardLayout);
+// Login card fields
+private JTextField loginUsernameField;
+private JPasswordField loginPasswordField;
+// Register card fields
+private JTextField regUsernameField;
+
+private JPasswordField regPasswordField;
+private JTextField regNameField;
+private JTextField regPhoneField;
+public LoginFrame() {
+setTitle("Smart Lost & Found Asset Tracking System -Login");
+setSize(440, 480);
+setLocationRelativeTo(null);
+setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+setResizable(false);
+cardPanel.add(buildLoginPanel(), "LOGIN");
+cardPanel.add(buildRegisterPanel(), "REGISTER");
+add(cardPanel);
+cardLayout.show(cardPanel, "LOGIN");
+}
+// -------------------------------------------------------
+// LOGIN CARD
+// -------------------------------------------------------
+private JPanel buildLoginPanel() {
+JPanel panel = new JPanel(new GridBagLayout());
+panel.setBorder(BorderFactory.createEmptyBorder(30,
+40, 30, 40));
+GridBagConstraints gbc = new GridBagConstraints();
+gbc.insets = new Insets(8, 4, 8, 4);
+gbc.fill = GridBagConstraints.HORIZONTAL;
+JLabel titleLabel = new JLabel("Smart Lost & Found");
+titleLabel.setFont(new Font("SansSerif", Font.BOLD,
+20));
+JLabel subtitleLabel = new JLabel("Asset TrackingSystem");
+subtitleLabel.setFont(new Font("SansSerif",
+Font.PLAIN, 13));
+loginUsernameField = new JTextField(18);
+loginPasswordField = new JPasswordField(18);
+
+JButton loginButton = new JButton("Login");
+JButton goToRegisterButton = new JButton("New user?Register here");
+goToRegisterButton.setBorderPainted(false);
+goToRegisterButton.setContentAreaFilled(false);
+goToRegisterButton.setForeground(new Color(30, 90,
+200));
+int row = 0;
+gbc.gridx = 0;
+gbc.gridy = row;
+gbc.gridwidth = 2;
+gbc.anchor = GridBagConstraints.CENTER;
+panel.add(titleLabel, gbc);
+row++;
+gbc.gridy = row;
+panel.add(subtitleLabel, gbc);
+row++;
+gbc.gridy = row;
+panel.add(Box.createVerticalStrut(10), gbc);
+gbc.gridwidth = 1;
+gbc.anchor = GridBagConstraints.LINE_END;
+row++;
+gbc.gridx = 0;
+gbc.gridy = row;
+panel.add(new JLabel("Username:"), gbc);
+gbc.gridx = 1;
+gbc.anchor = GridBagConstraints.LINE_START;
+panel.add(loginUsernameField, gbc);
+row++;
+gbc.gridx = 0;
+gbc.gridy = row;
+gbc.anchor = GridBagConstraints.LINE_END;
+panel.add(new JLabel("Password:"), gbc);
+gbc.gridx = 1;
+gbc.anchor = GridBagConstraints.LINE_START;
+panel.add(loginPasswordField, gbc);
+
+row++;
+gbc.gridx = 0;
+gbc.gridy = row;
+gbc.gridwidth = 2;
+gbc.anchor = GridBagConstraints.CENTER;
+gbc.insets = new Insets(18, 4, 4, 4);
+panel.add(loginButton, gbc);
+row++;
+gbc.gridy = row;
+gbc.insets = new Insets(4, 4, 4, 4);
+panel.add(goToRegisterButton, gbc);
+loginButton.addActionListener(e -> handleLogin());
+loginPasswordField.addActionListener(e ->
+handleLogin());
+goToRegisterButton.addActionListener(e ->
+cardLayout.show(cardPanel, "REGISTER"));
+return panel;
+}
+private void handleLogin() {
+String username = loginUsernameField.getText().trim();
+String password = new
+String(loginPasswordField.getPassword());
+if (username.isEmpty() || password.isEmpty()) {
+JOptionPane.showMessageDialog(this,
+"Please enter both username andpassword.",
+"Missing Information",
+JOptionPane.WARNING_MESSAGE);
+return;
+}
+User user = assetManager.login(username, password);
+if (user == null) {
+JOptionPane.showMessageDialog(this,
+"Invalid username or password.",
+"Login Failed",
+JOptionPane.ERROR_MESSAGE);
+return;
+
+}
+if (user.isAdmin()) {
+new AdminFrame(user).setVisible(true);
+} else {
+new DashboardFrame(user).setVisible(true);
+}
+dispose();
+}
+// -------------------------------------------------------
+// REGISTER CARD
+// -------------------------------------------------------
+private JPanel buildRegisterPanel() {
+JPanel panel = new JPanel(new GridBagLayout());
+panel.setBorder(BorderFactory.createEmptyBorder(30,
+40, 30, 40));
+GridBagConstraints gbc = new GridBagConstraints();
+gbc.insets = new Insets(8, 4, 8, 4);
+gbc.fill = GridBagConstraints.HORIZONTAL;
+JLabel titleLabel = new JLabel("Create a NewAccount");
+titleLabel.setFont(new Font("SansSerif", Font.BOLD,
+18));
+regUsernameField = new JTextField(18);
+regPasswordField = new JPasswordField(18);
+regNameField = new JTextField(18);
+regPhoneField = new JTextField(18);
+JButton registerButton = new JButton("Register");
+JButton backToLoginButton = new JButton("Already havean account? Login");
+backToLoginButton.setBorderPainted(false);
+backToLoginButton.setContentAreaFilled(false);
+backToLoginButton.setForeground(new Color(30, 90,
+200));
+int row = 0;
+
+gbc.gridx = 0;
+gbc.gridy = row;
+gbc.gridwidth = 2;
+gbc.anchor = GridBagConstraints.CENTER;
+panel.add(titleLabel, gbc);
+gbc.gridwidth = 1;
+row++;
+gbc.gridx = 0;
+gbc.gridy = row;
+gbc.anchor = GridBagConstraints.LINE_END;
+panel.add(new JLabel("Username:"), gbc);
+gbc.gridx = 1;
+gbc.anchor = GridBagConstraints.LINE_START;
+panel.add(regUsernameField, gbc);
+row++;
+gbc.gridx = 0;
+gbc.gridy = row;
+gbc.anchor = GridBagConstraints.LINE_END;
+panel.add(new JLabel("Password:"), gbc);
+gbc.gridx = 1;
+gbc.anchor = GridBagConstraints.LINE_START;
+panel.add(regPasswordField, gbc);
+row++;
+gbc.gridx = 0;
+gbc.gridy = row;
+gbc.anchor = GridBagConstraints.LINE_END;
+panel.add(new JLabel("Full Name:"), gbc);
+gbc.gridx = 1;
+gbc.anchor = GridBagConstraints.LINE_START;
+panel.add(regNameField, gbc);
+row++;
+gbc.gridx = 0;
+gbc.gridy = row;
+gbc.anchor = GridBagConstraints.LINE_END;
+panel.add(new JLabel("Phone:"), gbc);
+gbc.gridx = 1;
+gbc.anchor = GridBagConstraints.LINE_START;
+panel.add(regPhoneField, gbc);
+
+row++;
+gbc.gridx = 0;
+gbc.gridy = row;
+gbc.gridwidth = 2;
+gbc.anchor = GridBagConstraints.CENTER;
+gbc.insets = new Insets(18, 4, 4, 4);
+panel.add(registerButton, gbc);
+row++;
+gbc.gridy = row;
+gbc.insets = new Insets(4, 4, 4, 4);
+panel.add(backToLoginButton, gbc);
+registerButton.addActionListener(e ->
+handleRegister());
+backToLoginButton.addActionListener(e -> {
+clearRegisterFields();
+cardLayout.show(cardPanel, "LOGIN");
+});
+return panel;
+}
+private void handleRegister() {
+String username = regUsernameField.getText().trim();
+String password = new
+String(regPasswordField.getPassword());
+String name = regNameField.getText().trim();
+String phone = regPhoneField.getText().trim();
+if (username.isEmpty() || password.isEmpty() ||
+name.isEmpty()) {
+JOptionPane.showMessageDialog(this,
+"Username, password and full name arerequired.",
+"Missing Information",
+JOptionPane.WARNING_MESSAGE);
+return;
+}
+if ("kathir".equalsIgnoreCase(username)) {
+JOptionPane.showMessageDialog(this,
+"This username is reserved. Please chooseanother one.",
+
+"Registration Failed",
+JOptionPane.ERROR_MESSAGE);
+return;
+}
+boolean success = assetManager.register(username,
+password, name, phone);
+if (success) {
+JOptionPane.showMessageDialog(this,
+"Registration successful! You can now login.",
+"Welcome",
+JOptionPane.INFORMATION_MESSAGE);
+clearRegisterFields();
+cardLayout.show(cardPanel, "LOGIN");
+} else {
+JOptionPane.showMessageDialog(this,
+"That username is already taken. Pleasechoose another one.",
+"Registration Failed",
+JOptionPane.ERROR_MESSAGE);
+}
+}
+private void clearRegisterFields() {
+regUsernameField.setText("");
+regPasswordField.setText("");
+regNameField.setText("");
+regPhoneField.setText("");
+}
+}
+
+8.DashboardFrame.java src:-
+
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
+
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
+/**
+* DashboardFrame.java
+*
+* The main screen shown to a normal (non-admin) user after
+* logging
+* in. Organised as four tabs:
+*
+* 1. Report Lost Item - form to report something the user
+* lost
+* 2. Report Found Item - form to report something the user
+* found
+* 3. Search & Browse - GLOBAL view of every Lost/Found
+* item in
+* the system, with keyword search
+* and filters
+* 4. My Reports - only the items THIS user has
+* reported,
+* with the ability to update status
+* or delete
+*
+* Every read/write to the database goes through the shared
+* AssetManager instance — this class only builds and reacts
+* to the
+* Swing UI.
+*/
+public class DashboardFrame extends JFrame {
+private static final String[] CATEGORIES =
+{"Electronics", "Documents", "Bags & Wallets",
+"Accessories", "Clothing", "Keys", "Others"};
+private static final String[] FILTER_CATEGORIES =
+{"All", "Electronics", "Documents", "Bags &Wallets", "Accessories", "Clothing", "Keys", "Others"};
+private static final String[] TYPE_FILTER_OPTIONS =
+{"All", "LOST", "FOUND"};
+
+private static final String[] STATUS_OPTIONS = {"ACTIVE",
+"CLAIMED", "CLOSED"};
+private static final String[] FILTER_STATUS_OPTIONS =
+{"All", "ACTIVE", "CLAIMED", "CLOSED"};
+private final User currentUser;
+private final AssetManager assetManager = new
+AssetManager();
+private final ReportFormPanel lostForm = new
+ReportFormPanel("Submit Lost Report");
+private final ReportFormPanel foundForm = new
+ReportFormPanel("Submit Found Report");
+// Search & Browse tab
+private JTextField searchField;
+private JComboBox<String> typeFilterCombo;
+private JComboBox<String> categoryFilterCombo;
+private JComboBox<String> statusFilterCombo;
+private JTextField filterLocationField;
+private DefaultTableModel browseTableModel;
+private JTable browseTable;
+private List<Item> browseItemsList = new ArrayList<>();
+// My Reports tab
+private DefaultTableModel myReportsTableModel;
+private JTable myReportsTable;
+private List<Item> myReportsItemsList = new ArrayList<>();
+public DashboardFrame(User user) {
+this.currentUser = user;
+setTitle("Smart Lost & Found Asset Tracking System -Dashboard");
+setSize(980, 640);
+setLocationRelativeTo(null);
+setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+setLayout(new BorderLayout());
+add(buildTopBar(), BorderLayout.NORTH);
+JTabbedPane tabbedPane = new JTabbedPane();
+
+tabbedPane.addTab("Report Lost Item", lostForm.panel);
+tabbedPane.addTab("Report Found Item",
+foundForm.panel);
+tabbedPane.addTab("Search & Browse",
+buildBrowsePanel());
+tabbedPane.addTab("My Reports",
+buildMyReportsPanel());
+add(tabbedPane, BorderLayout.CENTER);
+lostForm.submitButton.addActionListener(e ->
+submitReport(lostForm, "LOST"));
+foundForm.submitButton.addActionListener(e ->
+submitReport(foundForm, "FOUND"));
+refreshBrowseTable();
+refreshMyReportsTable();
+}
+private JPanel buildTopBar() {
+JPanel topBar = new JPanel(new BorderLayout());
+topBar.setBorder(BorderFactory.createEmptyBorder(8,
+12, 8, 12));
+JLabel welcomeLabel = new JLabel(
+"Welcome, " + currentUser.getName() + " (" +
+currentUser.getUsername() + ")");
+welcomeLabel.setFont(new Font("SansSerif", Font.BOLD,
+14));
+JButton logoutButton = new JButton("Logout");
+logoutButton.addActionListener(e -> logout());
+JPanel logoutPanel = new JPanel(new
+FlowLayout(FlowLayout.RIGHT));
+logoutPanel.add(logoutButton);
+topBar.add(welcomeLabel, BorderLayout.WEST);
+topBar.add(logoutPanel, BorderLayout.EAST);
+return topBar;
+}
+private void logout() {
+new LoginFrame().setVisible(true);
+dispose();
+}
+
+// -------------------------------------------------------
+// REPORT LOST / REPORT FOUND (shared submit logic)
+// -------------------------------------------------------
+private void submitReport(ReportFormPanel form, String
+type) {
+String name = form.nameField.getText().trim();
+String category = (String)
+form.categoryCombo.getSelectedItem();
+String description =
+form.descriptionArea.getText().trim();
+String colour = form.colourField.getText().trim();
+String location = form.locationField.getText().trim();
+String dateText = form.dateField.getText().trim();
+String contact = form.contactField.getText().trim();
+if (name.isEmpty() || colour.isEmpty() ||
+location.isEmpty()
+|| dateText.isEmpty() || contact.isEmpty()) {
+JOptionPane.showMessageDialog(this,
+"Please fill in name, colour, location,date and contact info.",
+"Missing Information",
+JOptionPane.WARNING_MESSAGE);
+return;
+}
+LocalDate date;
+try {
+date = LocalDate.parse(dateText);
+} catch (DateTimeParseException ex) {
+JOptionPane.showMessageDialog(this,
+"Please enter the date in YYYY-MM-DDformat (example: 2026-08-13).",
+"Invalid Date",
+JOptionPane.WARNING_MESSAGE);
+return;
+}
+String imagePath = null;
+if (form.selectedImageFile != null) {
+
+try {
+imagePath =
+copyImageToAppFolder(form.selectedImageFile);
+} catch (IOException ex) {
+JOptionPane.showMessageDialog(this,
+"Could not save the selected image: "
++ ex.getMessage(),
+"Image Error",
+JOptionPane.ERROR_MESSAGE);
+return;
+}
+}
+Item item = ItemFactory.createItem(type, name,
+category, description, colour,
+location, date, currentUser.getUsername(),
+contact, "ACTIVE", imagePath);
+boolean success = assetManager.addItem(item);
+if (!success) {
+JOptionPane.showMessageDialog(this,
+"Could not save your report. Please tryagain.",
+"Error", JOptionPane.ERROR_MESSAGE);
+return;
+}
+form.clearFields();
+refreshBrowseTable();
+refreshMyReportsTable();
+announceSubmissionResult(item);
+}
+private void announceSubmissionResult(Item item) {
+List<Item> matches =
+assetManager.checkPossibleMatches(item);
+if (matches.isEmpty()) {
+JOptionPane.showMessageDialog(this,
+"Your report has been submittedsuccessfully.",
+"Report Submitted",
+JOptionPane.INFORMATION_MESSAGE);
+
+return;
+}
+StringBuilder message = new StringBuilder();
+message.append("Your report was submittedsuccessfully.\n\n");
+message.append("Good news - ").append(matches.size())
+.append(matches.size() == 1 ? " possible matchwas" : " possible matches were")
+.append(" found:\n\n");
+for (Item match : matches) {
+message.append("- ").append(match.getName())
+.append("(").append(match.getType()).append(") at ")
+.append(match.getLocation())
+.append(" - reported by").append(match.getReporterUsername())
+.append(", contact:").append(match.getContact())
+.append("\n");
+}
+JOptionPane.showMessageDialog(this,
+message.toString(),
+"Possible Match Found",
+JOptionPane.INFORMATION_MESSAGE);
+}
+/**
+* Copies a user-chosen image file into a local "images"
+* folder
+* next to the running application (created automatically
+* the
+* first time it's needed) and returns the relative path
+* that
+* gets stored in the "imagePath" field / image_path
+* column.
+*
+* A local absolute path (e.g.
+* "C:\Users\Name\Pictures\bag.jpg")
+* would only make sense on the computer that selected it.
+* Copying
+* the file into the project's own "images" folder means
+
+* every
+* user of the app running on the same machine can view
+* it, and
+* the stored path stays short and portable within the
+* project.
+*/
+private String copyImageToAppFolder(File sourceFile)
+throws IOException {
+File imagesDir = new File("images");
+if (!imagesDir.exists()) {
+imagesDir.mkdirs();
+}
+String originalName = sourceFile.getName();
+String extension = "";
+int dotIndex = originalName.lastIndexOf('.');
+if (dotIndex >= 0) {
+extension = originalName.substring(dotIndex);
+}
+String uniqueName = "img_" +
+System.currentTimeMillis() + extension;
+File destination = new File(imagesDir, uniqueName);
+Files.copy(sourceFile.toPath(), destination.toPath(),
+StandardCopyOption.REPLACE_EXISTING);
+return "images" + File.separator + uniqueName;
+}
+// -------------------------------------------------------
+// SEARCH & BROWSE TAB (global — every user's items)
+// -------------------------------------------------------
+private JPanel buildBrowsePanel() {
+JPanel panel = new JPanel(new BorderLayout(8, 8));
+panel.setBorder(BorderFactory.createEmptyBorder(10,
+10, 10, 10));
+JPanel controls = new JPanel();
+controls.setLayout(new BoxLayout(controls,
+BoxLayout.Y_AXIS));
+
+JPanel searchRow = new JPanel(new
+FlowLayout(FlowLayout.LEFT, 6, 4));
+searchField = new JTextField(20);
+JButton searchButton = new JButton("Search");
+JButton showAllButton = new JButton("Show All");
+searchRow.add(new JLabel("Keyword:"));
+searchRow.add(searchField);
+searchRow.add(searchButton);
+searchRow.add(showAllButton);
+JPanel filterRow = new JPanel(new
+FlowLayout(FlowLayout.LEFT, 6, 4));
+typeFilterCombo = new JComboBox<>
+(TYPE_FILTER_OPTIONS);
+categoryFilterCombo = new JComboBox<>
+(FILTER_CATEGORIES);
+statusFilterCombo = new JComboBox<>
+(FILTER_STATUS_OPTIONS);
+filterLocationField = new JTextField(12);
+JButton filterButton = new JButton("Apply Filters");
+filterRow.add(new JLabel("Type:"));
+filterRow.add(typeFilterCombo);
+filterRow.add(new JLabel("Category:"));
+filterRow.add(categoryFilterCombo);
+filterRow.add(new JLabel("Status:"));
+filterRow.add(statusFilterCombo);
+filterRow.add(new JLabel("Location:"));
+filterRow.add(filterLocationField);
+filterRow.add(filterButton);
+controls.add(searchRow);
+controls.add(filterRow);
+browseTableModel = createItemTableModel();
+browseTable = new JTable(browseTableModel);
+browseTable.setRowHeight(22);
+JScrollPane tableScroll = new
+JScrollPane(browseTable);
+JPanel bottomRow = new JPanel(new
+FlowLayout(FlowLayout.LEFT));
+JButton viewImageButton = new JButton("View Image");
+JLabel hintLabel = new JLabel(" (tip: double-click arow to view its image)");
+
+bottomRow.add(viewImageButton);
+bottomRow.add(hintLabel);
+panel.add(controls, BorderLayout.NORTH);
+panel.add(tableScroll, BorderLayout.CENTER);
+panel.add(bottomRow, BorderLayout.SOUTH);
+searchButton.addActionListener(e -> performSearch());
+showAllButton.addActionListener(e -> {
+searchField.setText("");
+refreshBrowseTable();
+});
+filterButton.addActionListener(e -> performFilter());
+viewImageButton.addActionListener(e ->
+viewSelectedImage(browseTable, browseItemsList));
+browseTable.addMouseListener(new MouseAdapter() {
+@Override
+public void mouseClicked(MouseEvent e) {
+if (e.getClickCount() == 2) {
+viewSelectedImage(browseTable,
+browseItemsList);
+}
+}
+});
+return panel;
+}
+private void performSearch() {
+String keyword = searchField.getText().trim();
+if (keyword.isEmpty()) {
+refreshBrowseTable();
+return;
+}
+browseItemsList = assetManager.searchItems(keyword);
+fillItemTable(browseTableModel, browseItemsList);
+}
+private void performFilter() {
+String type = (String)
+typeFilterCombo.getSelectedItem();
+String category = (String)
+categoryFilterCombo.getSelectedItem();
+String status = (String)
+
+statusFilterCombo.getSelectedItem();
+String location =
+filterLocationField.getText().trim();
+browseItemsList = assetManager.filterItems(type,
+category, status, location);
+fillItemTable(browseTableModel, browseItemsList);
+}
+private void refreshBrowseTable() {
+browseItemsList = assetManager.getAllItems();
+fillItemTable(browseTableModel, browseItemsList);
+}
+// -------------------------------------------------------
+// MY REPORTS TAB (only this user's items)
+// -------------------------------------------------------
+private JPanel buildMyReportsPanel() {
+JPanel panel = new JPanel(new BorderLayout(8, 8));
+panel.setBorder(BorderFactory.createEmptyBorder(10,
+10, 10, 10));
+myReportsTableModel = createItemTableModel();
+myReportsTable = new JTable(myReportsTableModel);
+myReportsTable.setRowHeight(22);
+JScrollPane tableScroll = new
+JScrollPane(myReportsTable);
+JPanel buttonRow = new JPanel(new
+FlowLayout(FlowLayout.LEFT));
+JButton refreshButton = new JButton("Refresh");
+JButton viewImageButton = new JButton("View Image");
+JButton updateStatusButton = new JButton("UpdateStatus");
+JButton deleteButton = new JButton("Delete Report");
+buttonRow.add(refreshButton);
+buttonRow.add(viewImageButton);
+buttonRow.add(updateStatusButton);
+buttonRow.add(deleteButton);
+panel.add(new JLabel(" Items you have personally reported:"), BorderLayout.NORTH);
+panel.add(tableScroll, BorderLayout.CENTER);
+panel.add(buttonRow, BorderLayout.SOUTH);
+refreshButton.addActionListener(e ->
+refreshMyReportsTable());
+viewImageButton.addActionListener(e ->
+viewSelectedImage(myReportsTable, myReportsItemsList));
+updateStatusButton.addActionListener(e ->
+updateSelectedMyReportStatus());
+deleteButton.addActionListener(e ->
+deleteSelectedMyReport());
+myReportsTable.addMouseListener(new MouseAdapter() {
+@Override
+public void mouseClicked(MouseEvent e) {
+if (e.getClickCount() == 2) {
+viewSelectedImage(myReportsTable,
+myReportsItemsList);
+}
+}
+});
+return panel;
+}
+private void refreshMyReportsTable() {
+myReportsItemsList =
+assetManager.getUserItems(currentUser.getUsername());
+fillItemTable(myReportsTableModel,
+myReportsItemsList);
+}
+private void updateSelectedMyReportStatus() {
+int row = myReportsTable.getSelectedRow();
+if (row < 0) {
+JOptionPane.showMessageDialog(this, "Please selectan item first.",
+"No Selection",
+JOptionPane.WARNING_MESSAGE);
+return;
+}
+Item item = myReportsItemsList.get(row);
+Object choice = JOptionPane.showInputDialog(this,
+
+"Update status for \"" + item.getName() +
+"\":",
+"Update Status", JOptionPane.QUESTION_MESSAGE,
+null,
+STATUS_OPTIONS, item.getStatus());
+if (choice == null) {
+return;
+}
+boolean success =
+assetManager.updateItemStatus(item.getId(),
+choice.toString());
+if (success) {
+refreshMyReportsTable();
+refreshBrowseTable();
+} else {
+JOptionPane.showMessageDialog(this, "Could notupdate the status.",
+"Error", JOptionPane.ERROR_MESSAGE);
+}
+}
+private void deleteSelectedMyReport() {
+int row = myReportsTable.getSelectedRow();
+if (row < 0) {
+JOptionPane.showMessageDialog(this, "Please selectan item first.",
+"No Selection",
+JOptionPane.WARNING_MESSAGE);
+return;
+}
+Item item = myReportsItemsList.get(row);
+int confirm = JOptionPane.showConfirmDialog(this,
+"Delete your report \"" + item.getName() +
+"\"? This cannot be undone.",
+"Confirm Delete", JOptionPane.YES_NO_OPTION,
+JOptionPane.WARNING_MESSAGE);
+if (confirm == JOptionPane.YES_OPTION) {
+boolean success =
+assetManager.deleteItem(item.getId());
+if (success) {
+
+refreshMyReportsTable();
+refreshBrowseTable();
+} else {
+JOptionPane.showMessageDialog(this, "Could notdelete this report.",
+"Error", JOptionPane.ERROR_MESSAGE);
+}
+}
+}
+// -------------------------------------------------------
+// SHARED TABLE + IMAGE HELPERS
+// -------------------------------------------------------
+private DefaultTableModel createItemTableModel() {
+String[] columns = {"ID", "Type", "Name", "Category",
+"Description", "Colour",
+"Location", "Date", "Reporter", "Contact",
+"Status", "Image"};
+return new DefaultTableModel(columns, 0) {
+@Override
+public boolean isCellEditable(int row, int column)
+{
+return false;
+}
+};
+}
+private void fillItemTable(DefaultTableModel model,
+List<Item> items) {
+model.setRowCount(0);
+for (Item item : items) {
+model.addRow(new Object[]{
+item.getId(),
+item.getType(),
+item.getName(),
+item.getCategory(),
+item.getDescription(),
+item.getColour(),
+item.getLocation(),
+item.getDate() != null ?
+item.getDate().toString() : "",
+
+item.getReporterUsername(),
+item.getContact(),
+item.getStatus(),
+item.hasImage() ? "View Image" : "NoImage"
+});
+}
+}
+private void viewSelectedImage(JTable table, List<Item>
+items) {
+int row = table.getSelectedRow();
+if (row < 0) {
+JOptionPane.showMessageDialog(this, "Please selectan item first.",
+"No Selection",
+JOptionPane.WARNING_MESSAGE);
+return;
+}
+showImagePreview(items.get(row).getImagePath());
+}
+private void showImagePreview(String imagePath) {
+if (imagePath == null || imagePath.isBlank()) {
+JOptionPane.showMessageDialog(this, "No imageavailable for this item.",
+"No Image",
+JOptionPane.INFORMATION_MESSAGE);
+return;
+}
+File imageFile = new File(imagePath);
+if (!imageFile.exists()) {
+JOptionPane.showMessageDialog(this,
+"Image file not found on this computer:\n"
++ imagePath,
+"Image Missing",
+JOptionPane.WARNING_MESSAGE);
+return;
+}
+ImageIcon icon = new ImageIcon(imagePath);
+Image scaledImage =
+icon.getImage().getScaledInstance(320, 240,
+
+Image.SCALE_SMOOTH);
+JOptionPane.showMessageDialog(this, new JLabel(new
+ImageIcon(scaledImage)),
+"Image Preview", JOptionPane.PLAIN_MESSAGE);
+}
+// -------------------------------------------------------
+// Report form: groups the Swing fields for ONE report form
+// (used once for "Report Lost Item" and once for "Report Found
+// Item") so the two tabs do not need to duplicate ten
+// separate field declarations each.
+// -------------------------------------------------------
+private static class ReportFormPanel {
+final JPanel panel = new JPanel(new GridBagLayout());
+final JTextField nameField = new JTextField(18);
+final JComboBox<String> categoryCombo = new
+JComboBox<>(CATEGORIES);
+final JTextArea descriptionArea = new JTextArea(3,
+18);
+final JTextField colourField = new JTextField(18);
+final JTextField locationField = new JTextField(18);
+final JTextField dateField = new JTextField(18);
+final JTextField contactField = new JTextField(18);
+final JButton chooseImageButton = new JButton("ChooseImage...");
+final JLabel imageStatusLabel = new JLabel("No ImageSelected");
+final JButton submitButton;
+File selectedImageFile;
+ReportFormPanel(String submitLabel) {
+submitButton = new JButton(submitLabel);
+buildLayout();
+wireImageChooser();
+}
+private void buildLayout() {
+
+panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20,
+30));
+GridBagConstraints gbc = new GridBagConstraints();
+gbc.insets = new Insets(6, 6, 6, 6);
+gbc.fill = GridBagConstraints.HORIZONTAL;
+descriptionArea.setLineWrap(true);
+descriptionArea.setWrapStyleWord(true);
+JScrollPane descScroll = new
+JScrollPane(descriptionArea);
+int row = 0;
+addRow(gbc, row++, "Item Name:", nameField);
+addRow(gbc, row++, "Category:", categoryCombo);
+addRow(gbc, row++, "Description:", descScroll);
+addRow(gbc, row++, "Colour:", colourField);
+addRow(gbc, row++, "Location:", locationField);
+addRow(gbc, row++, "Date (YYYY-MM-DD):",
+dateField);
+addRow(gbc, row++, "Contact Info:", contactField);
+JPanel imagePanel = new JPanel(new
+FlowLayout(FlowLayout.LEFT, 8, 0));
+imagePanel.add(chooseImageButton);
+imagePanel.add(imageStatusLabel);
+addRow(gbc, row++, "Image:", imagePanel);
+gbc.gridx = 0;
+gbc.gridy = row;
+gbc.gridwidth = 2;
+gbc.insets = new Insets(16, 6, 6, 6);
+panel.add(submitButton, gbc);
+}
+private void addRow(GridBagConstraints gbc, int row,
+String label, JComponent field) {
+gbc.gridx = 0;
+gbc.gridy = row;
+gbc.gridwidth = 1;
+gbc.anchor = GridBagConstraints.LINE_END;
+panel.add(new JLabel(label), gbc);
+gbc.gridx = 1;
+gbc.anchor = GridBagConstraints.LINE_START;
+panel.add(field, gbc);
+
+}
+private void wireImageChooser() {
+chooseImageButton.addActionListener(e -> {
+JFileChooser chooser = new JFileChooser();
+chooser.setDialogTitle("Select an Image");
+chooser.setFileFilter(new
+FileNameExtensionFilter(
+"Image files", "jpg", "jpeg", "png",
+"gif"));
+int result = chooser.showOpenDialog(panel);
+if (result == JFileChooser.APPROVE_OPTION) {
+selectedImageFile =
+chooser.getSelectedFile();
+imageStatusLabel.setText(selectedImageFile.getName());
+}
+});
+}
+void clearFields() {
+nameField.setText("");
+categoryCombo.setSelectedIndex(0);
+descriptionArea.setText("");
+colourField.setText("");
+locationField.setText("");
+dateField.setText("");
+contactField.setText("");
+imageStatusLabel.setText("No Image Selected");
+selectedImageFile = null;
+}
+}
+}
+
+9.AdminFrame.java src:-
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
+import java.time.LocalDate;
+
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
+/**
+* AdminFrame.java
+*
+* The screen shown only to the fixed application
+* administrator
+* ("kathir"). Gives full control over the system through four
+* tabs:
+*
+* 1. Admin Dashboard - live totals pulled from MySQL
+* 2. User Management - view every user, delete normal
+* users
+* ("kathir" itself can never be
+* deleted)
+* 3. Lost Items - view/add/delete/update status of
+* every
+* LOST item in the system
+* 4. Found Items - view/add/delete/update status of
+* every
+* FOUND item in the system
+*
+* Like every other screen, this class never touches java.sql
+* directly — everything goes through the shared AssetManager.
+*/
+public class AdminFrame extends JFrame {
+private static final String[] CATEGORIES =
+{"Electronics", "Documents", "Bags & Wallets",
+"Accessories", "Clothing", "Keys", "Others"};
+private static final String[] STATUS_OPTIONS = {"ACTIVE",
+"CLAIMED", "CLOSED"};
+private final User currentUser;
+private final AssetManager assetManager = new
+AssetManager();
+// Admin Dashboard tab
+private JLabel totalUsersValueLabel;
+private JLabel totalItemsValueLabel;
+private JLabel totalLostValueLabel;
+
+private JLabel totalFoundValueLabel;
+// User Management tab
+private DefaultTableModel usersTableModel;
+private JTable usersTable;
+private List<User> usersList = new ArrayList<>();
+// Lost Items / Found Items tabs (built after assetManager exists)
+private final ItemManagementTab lostItemsTab = new
+ItemManagementTab("LOST");
+private final ItemManagementTab foundItemsTab = new
+ItemManagementTab("FOUND");
+public AdminFrame(User user) {
+this.currentUser = user;
+setTitle("Smart Lost & Found Asset Tracking System -Admin Panel");
+setSize(1020, 660);
+setLocationRelativeTo(null);
+setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+setLayout(new BorderLayout());
+add(buildTopBar(), BorderLayout.NORTH);
+JTabbedPane tabbedPane = new JTabbedPane();
+tabbedPane.addTab("Admin Dashboard",
+buildDashboardTab());
+tabbedPane.addTab("User Management",
+buildUserManagementTab());
+tabbedPane.addTab("Lost Items", lostItemsTab.panel);
+tabbedPane.addTab("Found Items", foundItemsTab.panel);
+add(tabbedPane, BorderLayout.CENTER);
+refreshDashboardStats();
+refreshUsersTable();
+lostItemsTab.refresh();
+foundItemsTab.refresh();
+}
+private JPanel buildTopBar() {
+JPanel topBar = new JPanel(new BorderLayout());
+topBar.setBorder(BorderFactory.createEmptyBorder(8,
+
+12, 8, 12));
+JLabel titleLabel = new JLabel(
+"Administrator: " + currentUser.getName() + "(" + currentUser.getUsername() + ")");
+titleLabel.setFont(new Font("SansSerif", Font.BOLD,
+14));
+JButton logoutButton = new JButton("Logout");
+logoutButton.addActionListener(e -> logout());
+JPanel logoutPanel = new JPanel(new
+FlowLayout(FlowLayout.RIGHT));
+logoutPanel.add(logoutButton);
+topBar.add(titleLabel, BorderLayout.WEST);
+topBar.add(logoutPanel, BorderLayout.EAST);
+return topBar;
+}
+private void logout() {
+new LoginFrame().setVisible(true);
+dispose();
+}
+// -------------------------------------------------------
+// ADMIN DASHBOARD TAB
+// -------------------------------------------------------
+private JPanel buildDashboardTab() {
+JPanel panel = new JPanel(new BorderLayout());
+panel.setBorder(BorderFactory.createEmptyBorder(30,
+30, 30, 30));
+JPanel statsGrid = new JPanel(new GridLayout(2, 2, 20,
+20));
+totalUsersValueLabel = new JLabel("0",
+SwingConstants.CENTER);
+totalItemsValueLabel = new JLabel("0",
+SwingConstants.CENTER);
+totalLostValueLabel = new JLabel("0",
+SwingConstants.CENTER);
+
+totalFoundValueLabel = new JLabel("0",
+SwingConstants.CENTER);
+statsGrid.add(buildStatCard("Total Users",
+totalUsersValueLabel));
+statsGrid.add(buildStatCard("Total Items",
+totalItemsValueLabel));
+statsGrid.add(buildStatCard("Total Lost Items",
+totalLostValueLabel));
+statsGrid.add(buildStatCard("Total Found Items",
+totalFoundValueLabel));
+JButton refreshButton = new JButton("RefreshDashboard");
+refreshButton.addActionListener(e ->
+refreshDashboardStats());
+JPanel refreshPanel = new JPanel(new
+FlowLayout(FlowLayout.CENTER));
+refreshPanel.add(refreshButton);
+panel.add(statsGrid, BorderLayout.CENTER);
+panel.add(refreshPanel, BorderLayout.SOUTH);
+return panel;
+}
+private JPanel buildStatCard(String title, JLabel
+valueLabel) {
+JPanel card = new JPanel(new BorderLayout());
+card.setBorder(BorderFactory.createLineBorder(new
+Color(190, 190, 190), 1, true));
+card.setPreferredSize(new Dimension(200, 120));
+JLabel titleLabel = new JLabel(title,
+SwingConstants.CENTER);
+titleLabel.setFont(new Font("SansSerif", Font.PLAIN,
+14));
+titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0,
+0));
+valueLabel.setFont(new Font("SansSerif", Font.BOLD,
+34));
+
+card.add(titleLabel, BorderLayout.NORTH);
+card.add(valueLabel, BorderLayout.CENTER);
+return card;
+}
+private void refreshDashboardStats() {
+AssetManager.Stats stats =
+assetManager.getDashboardStats();
+totalUsersValueLabel.setText(String.valueOf(stats.totalUsers))
+;
+totalItemsValueLabel.setText(String.valueOf(stats.totalItems))
+;
+totalLostValueLabel.setText(String.valueOf(stats.totalLostItems));
+totalFoundValueLabel.setText(String.valueOf(stats.totalFoundItems));
+}
+// -------------------------------------------------------
+// USER MANAGEMENT TAB
+// -------------------------------------------------------
+private JPanel buildUserManagementTab() {
+JPanel panel = new JPanel(new BorderLayout(8, 8));
+panel.setBorder(BorderFactory.createEmptyBorder(10,
+10, 10, 10));
+String[] columns = {"Username", "Name", "Phone",
+"Role"};
+usersTableModel = new DefaultTableModel(columns, 0) {
+@Override
+public boolean isCellEditable(int row, int column)
+{
+return false;
+}
+};
+usersTable = new JTable(usersTableModel);
+usersTable.setRowHeight(22);
+
+JScrollPane tableScroll = new JScrollPane(usersTable);
+JPanel buttonRow = new JPanel(new
+FlowLayout(FlowLayout.LEFT));
+JButton refreshButton = new JButton("Refresh");
+JButton deleteButton = new JButton("Delete SelectedUser");
+buttonRow.add(refreshButton);
+buttonRow.add(deleteButton);
+panel.add(tableScroll, BorderLayout.CENTER);
+panel.add(buttonRow, BorderLayout.SOUTH);
+refreshButton.addActionListener(e ->
+refreshUsersTable());
+deleteButton.addActionListener(e ->
+deleteSelectedUser());
+return panel;
+}
+private void refreshUsersTable() {
+usersList = assetManager.getAllUsers();
+usersTableModel.setRowCount(0);
+for (User u : usersList) {
+usersTableModel.addRow(new Object[]
+{u.getUsername(), u.getName(), u.getPhone(), u.getRole()});
+}
+}
+private void deleteSelectedUser() {
+int row = usersTable.getSelectedRow();
+if (row < 0) {
+JOptionPane.showMessageDialog(this, "Please selecta user first.",
+"No Selection",
+JOptionPane.WARNING_MESSAGE);
+return;
+}
+User user = usersList.get(row);
+if ("kathir".equalsIgnoreCase(user.getUsername())) {
+JOptionPane.showMessageDialog(this,
+
+"The administrator account \"kathir\"cannot be deleted.",
+"Action Not Allowed",
+JOptionPane.WARNING_MESSAGE);
+return;
+}
+int confirm = JOptionPane.showConfirmDialog(this,
+"Delete user \"" + user.getUsername() + "\"?This also removes their " +
+"reported items and cannot beundone.",
+"Confirm Delete", JOptionPane.YES_NO_OPTION,
+JOptionPane.WARNING_MESSAGE);
+if (confirm == JOptionPane.YES_OPTION) {
+boolean success =
+assetManager.deleteUser(user.getUsername());
+if (success) {
+refreshUsersTable();
+lostItemsTab.refresh();
+foundItemsTab.refresh();
+refreshDashboardStats();
+} else {
+JOptionPane.showMessageDialog(this, "Could notdelete this user.",
+"Error", JOptionPane.ERROR_MESSAGE);
+}
+}
+}
+// -------------------------------------------------------
+// SHARED TABLE + IMAGE HELPERS (used by both Lost and Found tabs)
+// -------------------------------------------------------
+private DefaultTableModel createItemTableModel() {
+String[] columns = {"ID", "Type", "Name", "Category",
+"Description", "Colour",
+"Location", "Date", "Reporter", "Contact",
+"Status", "Image"};
+return new DefaultTableModel(columns, 0) {
+
+@Override
+public boolean isCellEditable(int row, int column)
+{
+return false;
+}
+};
+}
+private void fillItemTable(DefaultTableModel model,
+List<Item> items) {
+model.setRowCount(0);
+for (Item item : items) {
+model.addRow(new Object[]{
+item.getId(),
+item.getType(),
+item.getName(),
+item.getCategory(),
+item.getDescription(),
+item.getColour(),
+item.getLocation(),
+item.getDate() != null ?
+item.getDate().toString() : "",
+item.getReporterUsername(),
+item.getContact(),
+item.getStatus(),
+item.hasImage() ? "View Image" : "NoImage"
+});
+}
+}
+private void viewSelectedImage(JTable table, List<Item>
+items) {
+int row = table.getSelectedRow();
+if (row < 0) {
+JOptionPane.showMessageDialog(this, "Please selectan item first.",
+"No Selection",
+JOptionPane.WARNING_MESSAGE);
+return;
+}
+showImagePreview(items.get(row).getImagePath());
+}
+
+private void showImagePreview(String imagePath) {
+if (imagePath == null || imagePath.isBlank()) {
+JOptionPane.showMessageDialog(this, "No imageavailable for this item.",
+"No Image",
+JOptionPane.INFORMATION_MESSAGE);
+return;
+}
+File imageFile = new File(imagePath);
+if (!imageFile.exists()) {
+JOptionPane.showMessageDialog(this,
+"Image file not found on this computer:\n"
++ imagePath,
+"Image Missing",
+JOptionPane.WARNING_MESSAGE);
+return;
+}
+ImageIcon icon = new ImageIcon(imagePath);
+Image scaledImage =
+icon.getImage().getScaledInstance(320, 240,
+Image.SCALE_SMOOTH);
+JOptionPane.showMessageDialog(this, new JLabel(new
+ImageIcon(scaledImage)),
+"Image Preview", JOptionPane.PLAIN_MESSAGE);
+}
+private String capitalize(String text) {
+return text.substring(0, 1).toUpperCase() +
+text.substring(1).toLowerCase();
+}
+// -------------------------------------------------------
+// Lost / Found item management tab (one instance per type, so
+// the admin panel does not need two near-identical copies of
+// every table/button/dialog).
+// -------------------------------------------------------
+private class ItemManagementTab {
+
+final String type;
+final JPanel panel = new JPanel(new BorderLayout(8,
+8));
+final DefaultTableModel tableModel;
+final JTable table;
+List<Item> itemsList = new ArrayList<>();
+ItemManagementTab(String type) {
+this.type = type;
+panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10,
+10));
+tableModel = createItemTableModel();
+table = new JTable(tableModel);
+table.setRowHeight(22);
+JScrollPane tableScroll = new JScrollPane(table);
+JPanel buttonRow = new JPanel(new
+FlowLayout(FlowLayout.LEFT));
+JButton refreshButton = new JButton("Refresh");
+JButton addButton = new JButton("Add " +
+capitalize(type) + " Item");
+JButton updateStatusButton = new JButton("UpdateStatus");
+JButton viewImageButton = new JButton("ViewImage");
+JButton deleteButton = new JButton("Delete");
+buttonRow.add(refreshButton);
+buttonRow.add(addButton);
+buttonRow.add(updateStatusButton);
+buttonRow.add(viewImageButton);
+buttonRow.add(deleteButton);
+panel.add(tableScroll, BorderLayout.CENTER);
+panel.add(buttonRow, BorderLayout.SOUTH);
+refreshButton.addActionListener(e -> refresh());
+addButton.addActionListener(e ->
+showAddItemDialog());
+updateStatusButton.addActionListener(e ->
+updateSelectedStatus());
+viewImageButton.addActionListener(e ->
+
+viewSelectedImage(table, itemsList));
+deleteButton.addActionListener(e ->
+deleteSelected());
+table.addMouseListener(new MouseAdapter() {
+@Override
+public void mouseClicked(MouseEvent e) {
+if (e.getClickCount() == 2) {
+viewSelectedImage(table, itemsList);
+}
+}
+});
+}
+void refresh() {
+List<Item> allItems = assetManager.getAllItems();
+itemsList = new ArrayList<>();
+for (Item item : allItems) {
+if (item.getType().equalsIgnoreCase(type)) {
+itemsList.add(item);
+}
+}
+fillItemTable(tableModel, itemsList);
+}
+void updateSelectedStatus() {
+int row = table.getSelectedRow();
+if (row < 0) {
+JOptionPane.showMessageDialog(AdminFrame.this,
+"Please select an item first.",
+"No Selection",
+JOptionPane.WARNING_MESSAGE);
+return;
+}
+Item item = itemsList.get(row);
+Object choice =
+JOptionPane.showInputDialog(AdminFrame.this,
+"Update status for \"" + item.getName() +
+"\":",
+"Update Status",
+JOptionPane.QUESTION_MESSAGE, null,
+STATUS_OPTIONS, item.getStatus());
+
+if (choice == null) {
+return;
+}
+boolean success =
+assetManager.updateItemStatus(item.getId(),
+choice.toString());
+if (success) {
+refresh();
+} else {
+JOptionPane.showMessageDialog(AdminFrame.this,
+"Could not update the status.",
+"Error", JOptionPane.ERROR_MESSAGE);
+}
+}
+void deleteSelected() {
+int row = table.getSelectedRow();
+if (row < 0) {
+JOptionPane.showMessageDialog(AdminFrame.this,
+"Please select an item first.",
+"No Selection",
+JOptionPane.WARNING_MESSAGE);
+return;
+}
+Item item = itemsList.get(row);
+int confirm =
+JOptionPane.showConfirmDialog(AdminFrame.this,
+"Delete \"" + item.getName() + "\"? Thiscannot be undone.",
+"Confirm Delete",
+JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+if (confirm == JOptionPane.YES_OPTION) {
+boolean success =
+assetManager.deleteItem(item.getId());
+if (success) {
+refresh();
+refreshDashboardStats();
+} else {
+JOptionPane.showMessageDialog(AdminFrame.this, "Could notdelete this item.",
+
+"Error",
+JOptionPane.ERROR_MESSAGE);
+}
+}
+}
+/**
+* Lets the admin log a report on behalf of someone
+* (for
+* example, a walk-in visitor at a front desk). The
+* reporter
+* must be an existing registered username — since the
+* "items" table enforces a foreign key on
+* reporter_username
+* — so this dialog presents a dropdown of real
+* usernames
+* instead of a free-text field.
+*
+* Image attachment is intentionally left out of this
+* quick
+* admin dialog to keep it simple; the reporting user
+* can
+* always attach an image themselves from their own
+* Dashboard.
+*/
+void showAddItemDialog() {
+JTextField nameField = new JTextField(18);
+JComboBox<String> categoryCombo = new JComboBox<>
+(CATEGORIES);
+JTextArea descriptionArea = new JTextArea(3, 18);
+descriptionArea.setLineWrap(true);
+descriptionArea.setWrapStyleWord(true);
+JTextField colourField = new JTextField(18);
+JTextField locationField = new JTextField(18);
+JTextField dateField = new JTextField(18);
+dateField.setText(LocalDate.now().toString());
+JTextField contactField = new JTextField(18);
+List<User> allUsers = assetManager.getAllUsers();
+String[] usernames = new String[allUsers.size()];
+int adminIndex = 0;
+for (int i = 0; i < allUsers.size(); i++) {
+usernames[i] = allUsers.get(i).getUsername();
+if
+
+(usernames[i].equalsIgnoreCase(currentUser.getUsername())) {
+adminIndex = i;
+}
+}
+JComboBox<String> reporterCombo = new JComboBox<>
+(usernames);
+if (usernames.length > 0) {
+reporterCombo.setSelectedIndex(adminIndex);
+}
+JPanel formPanel = new JPanel(new
+GridBagLayout());
+GridBagConstraints gbc = new GridBagConstraints();
+gbc.insets = new Insets(5, 5, 5, 5);
+gbc.fill = GridBagConstraints.HORIZONTAL;
+JScrollPane descScroll = new
+JScrollPane(descriptionArea);
+String[] labels = {"Item Name:", "Category:",
+"Description:", "Colour:",
+"Location:", "Date (YYYY-MM-DD):",
+"Contact Info:", "Reporter Username:"};
+JComponent[] fields = {nameField, categoryCombo,
+descScroll, colourField,
+locationField, dateField, contactField,
+reporterCombo};
+for (int i = 0; i < labels.length; i++) {
+gbc.gridx = 0;
+gbc.gridy = i;
+gbc.anchor = GridBagConstraints.LINE_END;
+formPanel.add(new JLabel(labels[i]), gbc);
+gbc.gridx = 1;
+gbc.anchor = GridBagConstraints.LINE_START;
+formPanel.add(fields[i], gbc);
+}
+int result =
+JOptionPane.showConfirmDialog(AdminFrame.this, formPanel,
+"Add " + capitalize(type) + " Item",
+JOptionPane.OK_CANCEL_OPTION,
+JOptionPane.PLAIN_MESSAGE);
+if (result != JOptionPane.OK_OPTION) {
+
+return;
+}
+String name = nameField.getText().trim();
+String category = (String)
+categoryCombo.getSelectedItem();
+String description =
+descriptionArea.getText().trim();
+String colour = colourField.getText().trim();
+String location = locationField.getText().trim();
+String dateText = dateField.getText().trim();
+String contact = contactField.getText().trim();
+String reporterUsername = (String)
+reporterCombo.getSelectedItem();
+if (name.isEmpty() || colour.isEmpty() ||
+location.isEmpty()
+|| dateText.isEmpty() || contact.isEmpty()
+|| reporterUsername == null) {
+JOptionPane.showMessageDialog(AdminFrame.this,
+"Please fill in all required fields.",
+"Missing Information",
+JOptionPane.WARNING_MESSAGE);
+return;
+}
+LocalDate date;
+try {
+date = LocalDate.parse(dateText);
+} catch (DateTimeParseException ex) {
+JOptionPane.showMessageDialog(AdminFrame.this,
+"Please enter the date in YYYY-MM-DDformat.",
+"Invalid Date",
+JOptionPane.WARNING_MESSAGE);
+return;
+}
+Item item = ItemFactory.createItem(type, name,
+category, description, colour,
+location, date, reporterUsername, contact,
+"ACTIVE", null);
+boolean success = assetManager.addItem(item);
+
+if (success) {
+refresh();
+refreshDashboardStats();
+JOptionPane.showMessageDialog(AdminFrame.this,
+"Item added successfully.",
+"Success",
+JOptionPane.INFORMATION_MESSAGE);
+} else {
+JOptionPane.showMessageDialog(AdminFrame.this,
+"Could not add the item.",
+"Error", JOptionPane.ERROR_MESSAGE);
+}
+}
+}
+}
+
+10.DatabaseConnection.java src:-
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import javax.swing.JOptionPane;
+
+public class DatabaseConnection {
+
+    private static final String DB_URL =
+            "jdbc:mysql://localhost:3306/lost_found_db?useSSL=false&serverTimezone=UTC";
+
+    private static final String DB_USER = "root";
+
+    // Replace this with your actual MySQL root password.
+    private static final String DB_PASSWORD = "#Kathir17";
+
+    // Fixed application administrator credentials.
+    private static final String ADMIN_USERNAME = "kathir";
+    private static final String ADMIN_PASSWORD = "#KathirSB17";
+    private static final String ADMIN_NAME = "Kathir (Administrator)";
+    private static final String ADMIN_PHONE = "N/A";
+    private static final String ADMIN_ROLE = "ADMIN";
+
+    private DatabaseConnection() {
+        // Utility class - no objects needed.
+    }
+
+    public static Connection getConnection() throws SQLException {
+
+        try {
+            // Explicitly load MySQL Connector/J driver.
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new SQLException(
+                    "MySQL Connector/J driver was not found. "
+                    + "Make sure the Connector/J JAR is included in the runtime classpath.",
+                    e
+            );
+        }
+
+        return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+    }
+
+    public static void initializeDatabase() {
+
+        String createUsersTable =
+                "CREATE TABLE IF NOT EXISTS users (" +
+                "id INT AUTO_INCREMENT PRIMARY KEY, " +
+                "username VARCHAR(50) NOT NULL UNIQUE, " +
+                "password VARCHAR(100) NOT NULL, " +
+                "name VARCHAR(100) NOT NULL, " +
+                "phone VARCHAR(20), " +
+                "role VARCHAR(10) NOT NULL DEFAULT 'USER'" +
+                ")";
+
+        String createItemsTable =
+                "CREATE TABLE IF NOT EXISTS items (" +
+                "id INT AUTO_INCREMENT PRIMARY KEY, " +
+                "type VARCHAR(10) NOT NULL, " +
+                "name VARCHAR(100) NOT NULL, " +
+                "category VARCHAR(50), " +
+                "description VARCHAR(500), " +
+                "colour VARCHAR(30), " +
+                "location VARCHAR(100), " +
+                "item_date DATE, " +
+                "reporter_username VARCHAR(50) NOT NULL, " +
+                "contact VARCHAR(50), " +
+                "status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE', " +
+                "image_path VARCHAR(255), " +
+                "CONSTRAINT fk_reporter_username " +
+                "FOREIGN KEY (reporter_username) " +
+                "REFERENCES users(username) ON DELETE CASCADE" +
+                ")";
+
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement()) {
+
+            stmt.execute(createUsersTable);
+            stmt.execute(createItemsTable);
+
+            createDefaultAdminIfMissing(conn);
+
+        } catch (SQLException e) {
+
+            e.printStackTrace();
+
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Could not connect to MySQL.\n\n" +
+                    "Please check:\n" +
+                    "1. MySQL Server is running\n" +
+                    "2. The 'lost_found_db' database exists\n" +
+                    "3. DB_PASSWORD in DatabaseConnection.java " +
+                    "matches your real MySQL password\n\n" +
+                    "Error details: " + e.getMessage(),
+                    "Database Connection Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+    private static void createDefaultAdminIfMissing(Connection conn)
+            throws SQLException {
+
+        String checkSql =
+                "SELECT id FROM users WHERE username = ?";
+
+        try (PreparedStatement checkStmt =
+                     conn.prepareStatement(checkSql)) {
+
+            checkStmt.setString(1, ADMIN_USERNAME);
+
+            try (ResultSet rs = checkStmt.executeQuery()) {
+
+                if (rs.next()) {
+                    return;
+                }
+            }
+        }
+
+        String insertSql =
+                "INSERT INTO users " +
+                "(username, password, name, phone, role) " +
+                "VALUES (?, ?, ?, ?, ?)";
+
+        try (PreparedStatement insertStmt =
+                     conn.prepareStatement(insertSql)) {
+
+            insertStmt.setString(1, ADMIN_USERNAME);
+            insertStmt.setString(2, ADMIN_PASSWORD);
+            insertStmt.setString(3, ADMIN_NAME);
+            insertStmt.setString(4, ADMIN_PHONE);
+            insertStmt.setString(5, ADMIN_ROLE);
+
+            insertStmt.executeUpdate();
+        }
+    }
+}
